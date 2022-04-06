@@ -1,24 +1,26 @@
 
-use std::process::Stdio;
 use std::process::Command;
-use std::process::Child;
 use std::path::Path;
 use std::io::stdin;
 use std::io::stdout;
 use std::io::Write;
 use std::env;
 
+
+
 fn main(){
+    let mut path_list: Vec<String> = vec!["/bin".to_string()]; // = []
+
     loop {
-        print!("> ");
+        print!("ccsh> ");
+        let mut all_commands = Vec::new();
         stdout().flush();
 
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
 
         // must be peekable so we know when we are on the last command
-        let mut commands = input.trim().split(" | ").peekable();
-        let mut previous_command = None;
+        let mut commands = input.trim().split(" & ").peekable();
 
         while let Some(command) = commands.next()  {
 
@@ -35,46 +37,39 @@ fn main(){
                         eprintln!("{}", e);
                     }
 
-                    previous_command = None;
                 },
+                "path" => {
+                    path_list = args.map(ToString::to_string).collect();
+                    eprintln!("{:?}", path_list);
+                }
                 "exit" => return,
                 command => {
-                    let stdin = previous_command
-                        .map_or(
-                            Stdio::inherit(),
-                            |output: Child| Stdio::from(output.stdout.unwrap())
-                        );
+                    
 
-                    let stdout = if commands.peek().is_some() {
-                        // there is another command piped behind this one
-                        // prepare to send output to the next command
-                        Stdio::piped()
-                    } else {
-                        // there are no more commands piped behind this one
-                        // send output to shell stdout
-                        Stdio::inherit()
-                    };
-
-                    let output = Command::new(command)
-                        .args(args)
-                        .stdin(stdin)
-                        .stdout(stdout)
-                        .spawn();
-
-                    match output {
-                        Ok(output) => { previous_command = Some(output); },
-                        Err(e) => {
-                            previous_command = None;
-                            eprintln!("{}", e);
-                        },
-                    };
+                    for direc in &path_list {
+                        if Path::new(direc).join(command).exists() {
+                    
+                            let output = Command::new(Path::new(direc).join(command))
+                                .args(args)
+                                .spawn();
+                            match output {
+                                Ok(output) => { all_commands.push(output); },
+                                Err(e) => {
+                                    eprintln!("{}", e);
+                                },
+                            };
+                            break;
+                        }
+                    }
                 }
+
+                
             }
         }
 
-        if let Some(mut final_command) = previous_command {
-            // block until the final command has finished
-            final_command.wait();
+        for mut cmd in all_commands {
+            let _ = cmd.wait();
+
         }
 
     }
