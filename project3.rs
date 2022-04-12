@@ -7,7 +7,7 @@ use std::io::Write;
 use std::env;
 
 fn main(){
-    let mut path_list: Vec<String> = vec!["/bin".to_string()]; // = []
+    let mut path_list: Vec<String> = vec!["/bin".to_string()]; 
 
     loop {
         print!("ccsh> ");
@@ -58,11 +58,9 @@ fn main(){
                         }
                     }
                 }
-
                 
             }
         }
-
         for mut cmd in all_commands {
             let _ = cmd.wait();
 
