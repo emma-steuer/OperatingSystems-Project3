@@ -6,8 +6,6 @@ use std::io::stdout;
 use std::io::Write;
 use std::env;
 
-
-
 fn main(){
     let mut path_list: Vec<String> = vec!["/bin".to_string()]; // = []
 
@@ -19,7 +17,6 @@ fn main(){
         let mut input = String::new();
         stdin().read_line(&mut input).unwrap();
 
-        // must be peekable so we know when we are on the last command
         let mut commands = input.trim().split(" & ").peekable();
 
         while let Some(command) = commands.next()  {
@@ -44,7 +41,6 @@ fn main(){
                 }
                 "exit" => return,
                 command => {
-                    
 
                     for direc in &path_list {
                         if Path::new(direc).join(command).exists() {
