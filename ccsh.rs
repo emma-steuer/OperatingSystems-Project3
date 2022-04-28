@@ -99,7 +99,7 @@ fn main(){
         loop {
             print!("ccsh> ");
             
-            stdout().flush();
+            stdout().flush().expect("An error has occured");
 
             let mut input = String::new();
             stdin().read_line(&mut input).unwrap();
