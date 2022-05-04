@@ -1,4 +1,4 @@
-# Emma Steuer & Isaiah Stapleton
+# Emma Steuer
 
 ## Operating Systems Project 3
 
